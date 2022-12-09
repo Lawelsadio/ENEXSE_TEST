@@ -1,0 +1,17 @@
+{
+  "name": "enexse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ip": "^2.0.0",
+    "mongoose": "^6.8.0",
+    "mongoose-unique-validator": "^3.1.0",
+    "nodemon": "^2.0.20",
+    "os": "^0.1.2"
+  }
+}
