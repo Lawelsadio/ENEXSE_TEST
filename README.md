@@ -50,3 +50,27 @@ dans le body:
 
 - Pour supprimer un agent:
 `http://localhost:4000/api/v1/6393a6aa2f7f08221b754b56`
+
+
+## dans la suite de ce Test nous avons modifier l'architectur du projet
+Nous avons maintenant un Backend et deux Front-end
+## static-fronc est celui qui concerne le test.
+pour l'excuter : lancer 
+`yarn start a l'terieur du dossier` static-front
+
+ou
+
+`npm start a l'terieur du dossier` static-front
+
+
+** La couleur du nombre total n'est pas conforme a celle attendu dans le test car celle proposé dans l enoncé est differente.
+
+- les donnees utiliser dans ce projet sont ceux recuperé dans le json
+
+
+## Dynamic-fronc est un front utilisant le back-end du  Test Node.js de ENEXSE
+
+donc ce dernier utilise un backend avec une base de donneés.
+ainsi les donneés sont manipulé dynamiquement
+
+
