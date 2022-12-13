@@ -41,6 +41,21 @@ exports.createAgent = (req, res, next) => {
     .catch(error => { res.status(400).json( { error })})
     };
 
+    // recuperer un agent en fonction de son ID
+exports.getOneAgent = (req, res, next) => {
+  Agent.findOne({
+    _id: req.params.id,
+  })
+    .then((agent) => {
+      res.status(200).json(agent);
+    })
+    .catch((error) => {
+      res.status(404).json({
+        error: error,
+      });
+    });
+};
+
 // Modification d'un agent
 exports.modifyAgent = (req, res, next) => {
     const agentObject = req.body;
@@ -48,7 +63,7 @@ exports.modifyAgent = (req, res, next) => {
       ...agentObject, 
       lastKeepAlive: getFullTimestamp()
     });
-    Agent.updateOne({name: req.params.name}, agent).then(
+    Agent.updateOne({_id: req.params.id}, agent).then(
       () => {
         res.status(201).json({
           message: 'Agent updated successfully!'
