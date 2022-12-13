@@ -56,11 +56,11 @@ dans le body:
 Nous avons maintenant un Backend et deux Front-end
 ## static-fronc est celui qui concerne le test.
 pour l'excuter : lancer 
-`yarn start a l'terieur du dossier` static-front
+`yarn start a l'interieur du dossier` static-front
 
 ou
 
-`npm start a l'terieur du dossier` static-front
+`npm start a l'interieur du dossier` static-front
 
 
 ** La couleur du nombre total n'est pas conforme a celle attendu dans le test car celle proposé dans l enoncé est differente.
