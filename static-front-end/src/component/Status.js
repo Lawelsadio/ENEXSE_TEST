@@ -2,15 +2,12 @@ import React, { useEffect, useState, useContext } from "react";
 import { MyContext } from "./MyContext";
 
 function Status() {
-  const [data, setData] = useContext(MyContext);
-  const [active, setActive] = useState(0);
-  const [disconnected, setDisconnected] = useState(0);
-  const [pending, setPending] = useState(0);
-  const [never_connected, setNever_connected] = useState(0);
-  const [totalAgent, setTotalAgent] = useState(0);
+  const [data] = useContext(MyContext);
+  const [status, setSatus] = useState([]);
 
   useEffect(() => {
-    agentStatus(data);
+    const statusData = agentStatus(data);
+    setSatus(statusData);
   }, []);
 
   const agentStatus = (data) => {
@@ -33,47 +30,45 @@ function Status() {
       }
     }
     totalAgent = disconnected + active + pending + never_connected;
-    setActive(active);
-    setDisconnected(disconnected);
-    setPending(pending);
-    setNever_connected(never_connected);
-    setTotalAgent(totalAgent);
+    var dataStutus = [
+      {
+        name: "Total Agents",
+        value: totalAgent,
+        color: "rgb(0, 107, 180)",
+      },
+      {
+        name: "Active Agents",
+        value: active,
+        color: "rgb(0, 120, 113)",
+      },
+      {
+        name: "Pending Agents",
+        value: pending,
+        color: " rgb(254, 197, 20)",
+      },
+      {
+        name: "Never connected Agents",
+        value: never_connected,
+        color: " rgb(189, 39, 30)",
+      },
+    ];
+    return dataStutus;
   };
+
+  const newStatus = status.map((data, idx) => {
+    return (
+      <div key={idx} className="card">
+        <div className="card-body">
+          <p className="card-text">{data.name}</p>
+          <h4 style={{ color: data.color }}>{data.value}</h4>
+        </div>
+      </div>
+    );
+  });
 
   return (
     <div className="status-container">
-      <div className="wrapper">
-        <div className="card">
-          <div className="card-body">
-            <p className="card-text">Total Agents</p>
-            <h4 className="card-total">{totalAgent}</h4>
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-body">
-            <p className="card-text">Actve agents</p>
-            <h4 className="card-active">{active}</h4>
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-body">
-            <p className="card-text">Disconnected agents</p>
-            <h4 className="card-disconnected">{disconnected}</h4>
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-body">
-            <p className="card-text">Pending Agents</p>
-            <h4 className="card-pending">{pending}</h4>
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-body">
-            <p className="card-text">Never connected Agents</p>
-            <h4 className="card-never_connected">{never_connected}</h4>
-          </div>
-        </div>
-      </div>
+      <div className="wrapper">{newStatus}</div>
     </div>
   );
 }
