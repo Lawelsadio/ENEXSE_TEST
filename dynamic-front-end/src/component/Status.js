@@ -4,14 +4,10 @@ import axios from "axios";
 const baseURL = "http://localhost:4000/api/v1/agents";
 
 function Status() {
-  const [active, setActive] = useState(0);
-  const [disconnected, setDisconnected] = useState(0);
-  const [pending, setPending] = useState(0);
-  const [never_connected, setNever_connected] = useState(0);
-  const [totalAgent, setTotalAgent] = useState(0);
+  const [status, setSatus] = useState([]);
 
   useEffect(() => {
-    getAgents();
+    getAgents().then((status) => setSatus(status));
   }, []);
 
   const getAgents = async () => {
@@ -35,68 +31,49 @@ function Status() {
         never_connected++;
       }
     }
+
     totalAgent = disconnected + active + pending + never_connected;
-    setActive(active);
-    setDisconnected(disconnected);
-    setPending(pending);
-    setNever_connected(never_connected);
-    setTotalAgent(totalAgent);
+
+    var dataStutus = [
+      {
+        name: "Total Agents",
+        value: totalAgent,
+        color: "rgb(0, 107, 180)",
+      },
+      {
+        name: "Active Agents",
+        value: active,
+        color: "rgb(0, 120, 113)",
+      },
+      {
+        name: "Pending Agents",
+        value: pending,
+        color: " rgb(254, 197, 20)",
+      },
+      {
+        name: "Never connected Agents",
+        value: never_connected,
+        color: " rgb(189, 39, 30)",
+      },
+    ];
+
+    return dataStutus;
   };
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexGrow: "1",
-        alignItems: "center",
-        margin: "20px",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}
-      >
-        <div className="card" style={{ width: "250px", margin: "7px" }}>
-          <div className="card-body">
-            <p className="card-text">Total Agents</p>
-            <h4 className="card-title" style={{ color: "rgb(0, 107, 180)" }}>
-              {totalAgent}
-            </h4>
-          </div>
-        </div>
-        <div className="card" style={{ width: "250px", margin: "7px" }}>
-          <div className="card-body">
-            <p className="card-text">Actve agents</p>
-            <h4 className="card-title" style={{ color: "rgb(0, 120, 113)" }}>
-              {active}
-            </h4>
-          </div>
-        </div>
-        <div className="card" style={{ width: "250px", margin: "7px" }}>
-          <div className="card-body">
-            <p className="card-text">Disconnected agents</p>
-            <h4 className="card-title" style={{ color: "rgb(189, 39, 30)" }}>
-              {disconnected}
-            </h4>
-          </div>
-        </div>
-        <div className="card" style={{ width: "250px", margin: "7px" }}>
-          <div className="card-body">
-            <p className="card-text">Pending Agents</p>
-            <h4 className="card-title" style={{ color: "rgb(254, 197, 20)" }}>
-              {pending}
-            </h4>
-          </div>
-        </div>
-        <div className="card" style={{ width: "250px", margin: "7px" }}>
-          <div className="card-body">
-            <p className="card-text">Never connected Agents</p>
-            <h4 className="card-title" style={{ color: "rgb(100, 106, 119)" }}>
-              {never_connected}
-            </h4>
-          </div>
+  const newtest = status.map((data, idx) => {
+    return (
+      <div key={idx} className="card">
+        <div className="card-body">
+          <p className="card-text">{data.name}</p>
+          <h4 style={{ color: data.color }}>{data.value}</h4>
         </div>
       </div>
+    );
+  });
+
+  return (
+    <div className="status-container">
+      <div className="wrapper">{newtest}</div>
     </div>
   );
 }
