@@ -12,10 +12,11 @@ function Status() {
 
   const agentStatus = (data) => {
     var totalAgent = 0;
-    var disconnected = 0;
     var active = 0;
     var pending = 0;
     var never_connected = 0;
+    var disconnected = 0;
+
     const dts = data.filter((person) => person.id !== "000");
 
     for (let i = 0; i < dts.length; i++) {
@@ -44,12 +45,17 @@ function Status() {
       {
         name: "Pending Agents",
         value: pending,
-        color: " rgb(254, 197, 20)",
+        color: "rgb(254, 197, 20)",
+      },
+      {
+        name: "Disconnected Agents",
+        value: disconnected,
+        color: "rgb(189, 39, 30)",
       },
       {
         name: "Never connected Agents",
         value: never_connected,
-        color: " rgb(189, 39, 30)",
+        color: "rgb(100, 106, 119)",
       },
     ];
     return dataStutus;

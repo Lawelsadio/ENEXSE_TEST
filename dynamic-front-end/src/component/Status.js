@@ -48,12 +48,17 @@ function Status() {
       {
         name: "Pending Agents",
         value: pending,
-        color: " rgb(254, 197, 20)",
+        color: "rgb(254, 197, 20)",
+      },
+      {
+        name: "Disconnected Agents",
+        value: disconnected,
+        color: "rgb(189, 39, 30)",
       },
       {
         name: "Never connected Agents",
         value: never_connected,
-        color: " rgb(189, 39, 30)",
+        color: "rgb(100, 106, 119)",
       },
     ];
 
