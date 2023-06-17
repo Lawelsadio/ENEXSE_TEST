@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import AutoReview from "./AutoRevew.js";
 import { useNavigate } from "react-router-dom";
 import { AutoContext } from "./contexte.js";
 import { useLocation } from "react-router-dom";
+import image1 from "../images/B1_image1.png";
 
 export default function Auto({ data }) {
   const {
@@ -51,31 +52,48 @@ const handleClick = () => {
       };
     }
   );
+  const answerIndexed = useRef();
 
   const response = trueAnswerData.map((data, idx) => {
+    const answerIndex1 = ["A", "B", "C", "D", "E"];
+    const answerIndex2 = ["OUI", "NON"];
+    answerIndexed.current = -1;
+    const answerIndexes = [answerIndex1, answerIndex2]; // Tableaux d'index regroupés
+    for (let i = 0; i < answerIndexes.length; i++) {
+      const answerIndex = answerIndexes[i];
+      if (answerIndex.includes(data.answer)) {
+        data.answer === "NON"
+          ? (answerIndexed.current = 0)
+          : (answerIndexed.current = answerIndex.indexOf(data.answer));
+        break;
+      }
+    }
     return (
       <div
+        key={idx}
         style={{
           display: "flex",
           gap: "10px",
           width: "100%",
           backgroundColor: "#CCCCCC",
           marginBottom: "5px",
-          padding: "20px",
+          padding: "10px",
           borderRadius: "10px",
           color: "black",
         }}
       >
         <div
           style={{
-            width: "30%",
+            width: "38%",
             backgroundColor: "white",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             textAlign: "center",
-            borderRadius: "20px",
+            alignContent: "center",
+            borderRadius: "50px",
             color: "red",
+            padding: "20px",
           }}
         >
           <h4>
@@ -90,7 +108,7 @@ const handleClick = () => {
             justifyContent: "center",
           }}
         >
-          <h4>{data.question}</h4>
+          <h4>{data.question[answerIndexed.current]}</h4>
         </div>
       </div>
     );
@@ -100,10 +118,8 @@ const handleClick = () => {
       selectedOptions.length ===
         levelData[currentSerieIndex].questions.length &&
       selectedOptions.every((option) => option !== undefined); // Vérifie si toutes les questions ont une option sélectionnée
-
     setAllQuestionsAnswered(answered);
   }, [levelData, currentSerieIndex]);
-  console.log("globalAnswer", globalAnswer);
   const handleOptionClick = (questionId, option) => {
     const questionIndex = levelData[currentSerieIndex].questions.findIndex(
       (q) => q.qid === questionId
@@ -115,29 +131,317 @@ const handleClick = () => {
   const handleClick = () => {
     setResponseShow(!responseShow);
     setTrueAnswerData(questionAnswerArrays);
-    console.log("answerSubmit", answerSubmit);
-
-    if (answerSubmit) {
+    if (answerSubmit && currentSerieIndex === levelData.length - 1) {
+      setAnswerSubmit(false);
+      setTrueAnswerData([]);
+      setResponseShow(false);
+      setGlobalAnswer((prevState) => [...prevState, selectedOptions]);
+      setSelectedOptions([]);
+      const queryString = new URLSearchParams({ level }).toString();
+      navigate(`/recapitulatif?${queryString}`, {
+        state: {
+          data: levelData,
+        },
+      });
+    } else if (answerSubmit) {
       setAnswerSubmit(false);
       setCurrentSerieIndex((prevIndex) => prevIndex + 1);
+      setGlobalAnswer((prevState) => [...prevState, selectedOptions]);
       setTrueAnswerData(questionAnswerArrays);
       setResponseShow(true);
+      setSelectedOptions([]);
     } else {
       setAnswerSubmit(true);
     }
   };
+  console.log("globalAnswer", globalAnswer);
 
   const questions2 =
     answerSubmit &&
     responseShow &&
-    levelData[currentSerieIndex].questions.map((question) => {
+    levelData[currentSerieIndex].questions.map((question, idx) => {
       const correctOption =
         trueAnswer[
           levelData[currentSerieIndex].questions.findIndex(
             (q) => q.qid === question.qid
           )
         ];
+      const questio = question.question.map((q, idx) => {
+        return (
+          <h4
+            key={idx}
+            style={{
+              borderRadius: "10px",
+              cursor: "default",
+              padding: "15px",
+              border: "solid transparent",
+            }}
+          >
+            {q}
+          </h4>
+        );
+      });
+      const option = question.options.map((option, idx) => {
+        const isSelected =
+          selectedOptions[
+            levelData[currentSerieIndex].questions.findIndex(
+              (q) => q.qid === question.qid
+            )
+          ] === option;
+        if (option === correctOption) {
+          return (
+            <div>
+              {question.question.length === question.options.length ? (
+                <div
+                  key={idx}
+                  style={{
+                    padding: "10px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "5px",
+                    backgroundColor: "white",
+                    marginBottom: "10px",
+                    borderRadius: "10px",
+                    paddingInlineEnd: "0px",
+                  }}
+                >
+                  <div style={{ width: "65%" }}>
+                    <h4>{question.question[idx]}</h4>
+                  </div>
 
+                  <div
+                    style={{
+                      width: "35%",
+                      backgroundColor: "white",
+                      padding: "10px",
+                      paddingBottom: "0px",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <h4
+                      className="choix"
+                      key={idx}
+                      style={{
+                        background: isSelected ? "green" : "orange",
+                        borderRadius: "10px",
+                        border: "solid #CCCCCC",
+                      }}
+                    >
+                      {option}
+                    </h4>
+                  </div>
+                </div>
+              ) : (
+                <h4
+                  className="choix"
+                  key={idx}
+                  style={{
+                    background: isSelected ? "green" : "orange",
+                    borderRadius: "10px",
+                    border: "solid #CCCCCC",
+                  }}
+                >
+                  {option}
+                </h4>
+              )}
+            </div>
+          );
+        } /// le else ici
+        else if (isSelected) {
+          return (
+            <div key={idx}>
+              {question.question.length === question.options.length ? (
+                <div
+                  style={{
+                    padding: "10px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "5px",
+                    backgroundColor: "white",
+                    marginBottom: "10px",
+                    borderRadius: "10px",
+                    paddingInlineEnd: "0px",
+                  }}
+                >
+                  <div style={{ width: "65%" }}>
+                    <h4>{question.question[idx]}</h4>
+                  </div>
+
+                  <div
+                    style={{
+                      width: "35%",
+                      backgroundColor: "white",
+                      padding: "10px",
+                      paddingBottom: "0px",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <h4
+                      className="choix"
+                      key={idx}
+                      style={{
+                        background: "red",
+                        borderRadius: "10px",
+                        border: "solid #CCCCCC",
+                      }}
+                    >
+                      {option}
+                    </h4>
+                  </div>
+                </div>
+              ) : (
+                <h4
+                  className="choix"
+                  key={idx}
+                  style={{
+                    background: "red",
+                    borderRadius: "10px",
+                    border: "solid #CCCCCC",
+                  }}
+                >
+                  {option}
+                </h4>
+              )}
+            </div>
+          );
+        } else {
+          return (
+            <div key={idx}>
+              {question.question.length === question.options.length ? (
+                <div
+                  style={{
+                    padding: "10px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "5px",
+                    backgroundColor: "white",
+                    marginBottom: "10px",
+                    borderRadius: "10px",
+                    paddingInlineEnd: "0px",
+                  }}
+                >
+                  <div style={{ width: "65%" }}>
+                    <h4>{question.question[idx]}</h4>
+                  </div>
+
+                  <div
+                    style={{
+                      width: "35%",
+                      backgroundColor: "white",
+                      padding: "10px",
+                      paddingBottom: "0px",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <h4
+                      className="choix"
+                      key={idx}
+                      style={{
+                        color: isSelected && "white",
+                        borderRadius: "10px",
+                        border: "solid #CCCCCC",
+                      }}
+                    >
+                      {option}
+                    </h4>
+                  </div>
+                </div>
+              ) : (
+                <h4
+                  className="choix"
+                  key={idx}
+                  style={{
+                    color: isSelected && "white",
+                    borderRadius: "10px",
+                    border: "solid #CCCCCC",
+                  }}
+                >
+                  {option}
+                </h4>
+              )}
+            </div>
+          );
+        }
+      });
+      return (
+        <div idx>
+          {question.question.length === question.options.length ? (
+            <div
+              style={{
+                width: "100%",
+                backgroundColor: "#CCCCCC",
+                padding: "10px",
+                paddingBottom: "0px",
+                borderRadius: "10px",
+                display: "flex",
+                flexDirection: "column",
+                marginBottom: "5px",
+              }}
+            >
+              {option}
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: "10px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "5px",
+                backgroundColor: "#CCCCCC",
+                marginBottom: "10px",
+                borderRadius: "10px",
+              }}
+              key={question.qid}
+            >
+              <div
+                style={{
+                  width: "65%",
+                  backgroundColor: "white",
+                  padding: "10px",
+                  paddingBottom: "0px",
+                  borderRadius: "10px",
+                }}
+              >
+                {questio}
+              </div>
+              <div
+                style={{
+                  width: "35%",
+                  backgroundColor: "white",
+                  padding: "10px",
+                  paddingBottom: "0px",
+                  borderRadius: "10px",
+                }}
+              >
+                {option}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    });
+
+  const questions = levelData[currentSerieIndex].questions.map(
+    (question, idx) => {
+      const questio = question.question.map((q, idx) => {
+        return (
+          <h4
+            key={idx}
+            style={{
+              borderRadius: "10px",
+              cursor: "default",
+              padding: "15px",
+              border: "solid transparent",
+            }}
+          >
+            {q}
+          </h4>
+        );
+      });
       const option = question.options.map((option, idx) => {
         const isSelected =
           selectedOptions[
@@ -146,143 +450,129 @@ const handleClick = () => {
             )
           ] === option;
 
-        if (option === correctOption) {
-          return (
-            <h4
-              className="choix"
-              key={idx}
-              style={{
-                background: isSelected ? "green" : "orange",
-                borderRadius: "10px",
-                border: "solid #CCCCCC",
-              }}
-            >
-              {option}
-            </h4>
-          );
-        } else if (isSelected) {
-          return (
-            <h4
-              className="choix"
-              key={idx}
-              style={{
-                background: "red",
-                borderRadius: "10px",
-                border: "solid #CCCCCC",
-              }}
-            >
-              {option}
-            </h4>
-          );
-        } else {
-          return (
-            <h4
-              className="choix"
-              key={idx}
-              style={{
-                color: isSelected && "white",
-                borderRadius: "10px",
-                border: "solid #CCCCCC",
-              }}
-            >
-              {option}
-            </h4>
-          );
-        }
+        return (
+          <div key={idx}>
+            {question.question.length === question.options.length ? (
+              <div
+                style={{
+                  padding: "10px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "5px",
+                  backgroundColor: "white",
+                  marginBottom: "10px",
+                  borderRadius: "10px",
+                  paddingInlineEnd: "0px",
+                }}
+              >
+                <div style={{ width: "65%" }}>
+                  <h4>{question.question[idx]}</h4>
+                </div>
+
+                <div
+                  style={{
+                    width: "35%",
+                    backgroundColor: "white",
+                    padding: "10px",
+                    paddingBottom: "0px",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <h4
+                    className="choix"
+                    key={idx}
+                    style={{
+                      background: isSelected ? "#3399FF" : "#CCCCCC",
+                      textTransform: isSelected && "uppercase",
+                      color: isSelected && "white",
+                      borderRadius: "10px",
+                      border: isSelected && "solid black",
+                    }}
+                    onClick={() => handleOptionClick(question.qid, option)}
+                  >
+                    {option}
+                  </h4>
+                </div>
+              </div>
+            ) : (
+              <h4
+                className="choix"
+                key={idx}
+                style={{
+                  background: isSelected ? "#3399FF" : "#CCCCCC",
+                  textTransform: isSelected && "uppercase",
+                  color: isSelected && "white",
+                  borderRadius: "10px",
+                  border: isSelected && "solid black",
+                }}
+                onClick={() => handleOptionClick(question.qid, option)}
+              >
+                {option}
+              </h4>
+            )}
+          </div>
+        );
       });
-
       return (
-        <div
-          style={{
-            padding: "10px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "10px",
-            backgroundColor: "#CCCCCC",
-            marginBottom: "10px",
-            borderRadius: "10px",
-          }}
-          key={question.qid}
-        >
-          <div style={{ width: "65%" }}>
-            <h4>
-              <b>{question.question}</b>
-            </h4>
-          </div>
-          <div
-            style={{
-              width: "35%",
-              backgroundColor: "white",
-              padding: "10px",
-              paddingBottom: "0px",
-              borderRadius: "10px",
-            }}
-          >
-            {option}
-          </div>
+        <div key={idx}>
+          {question.question.length === question.options.length ? (
+            <div
+              style={{
+                width: "100%",
+                backgroundColor: "#CCCCCC",
+                padding: "10px",
+                paddingBottom: "0px",
+                borderRadius: "10px",
+                display: "flex",
+                flexDirection: "column",
+                marginBottom: "5px",
+              }}
+            >
+              {option}
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: "10px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "5px",
+                backgroundColor: "#CCCCCC",
+                marginBottom: "10px",
+                borderRadius: "10px",
+              }}
+              key={question.qid}
+            >
+              <div
+                style={{
+                  width: "65%",
+                  backgroundColor: "white",
+                  padding: "10px",
+                  paddingBottom: "0px",
+                  borderRadius: "10px",
+                }}
+              >
+                {questio}
+              </div>
+              <div
+                style={{
+                  width: "35%",
+                  backgroundColor: "white",
+                  padding: "10px",
+                  paddingBottom: "0px",
+                  borderRadius: "10px",
+                }}
+              >
+                {option}
+              </div>
+            </div>
+          )}
         </div>
       );
-    });
-
-  const questions = levelData[currentSerieIndex].questions.map((question) => {
-    const option = question.options.map((option, idx) => {
-      const isSelected =
-        selectedOptions[
-          levelData[currentSerieIndex].questions.findIndex(
-            (q) => q.qid === question.qid
-          )
-        ] === option;
-      return (
-        <h4
-          className="choix"
-          key={idx}
-          style={{
-            background: isSelected ? "#3399FF" : "#CCCCCC",
-            textTransform: isSelected && "uppercase",
-            color: isSelected && "white",
-            borderRadius: "10px",
-            border: isSelected && "solid black",
-          }}
-          onClick={() => handleOptionClick(question.qid, option)}
-        >
-          {option}
-        </h4>
-      );
-    });
-    return (
-      <div
-        style={{
-          padding: "10px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "10px",
-          backgroundColor: "#CCCCCC",
-          marginBottom: "10px",
-          borderRadius: "10px",
-        }}
-        key={question.qid}
-      >
-        <div style={{ width: "65%" }}>
-          <h4>
-            <b>{question.question}</b>
-          </h4>
-        </div>
-        <div
-          style={{
-            width: "35%",
-            backgroundColor: "white",
-            padding: "10px",
-            paddingBottom: "0px",
-            borderRadius: "10px",
-          }}
-        >
-          {option}
-        </div>
-      </div>
-    );
-  });
+    }
+  );
 
   return (
     <div
@@ -361,7 +651,7 @@ const handleClick = () => {
               borderBottomRightRadius: "10px",
               borderBottomLeftRadius: "10px",
             }}
-            src="https://media.istockphoto.com/id/1146517111/fr/photo/mausol%C3%A9e-du-taj-mahal-%C3%A0-agra.jpg?s=612x612&w=0&k=20&c=jfsf7jwrVlGMpFq8F7B45u4RBlzpHUQOubAO0jD4NVI="
+            src={require(`../images/${levelData[currentSerieIndex].image}`)}
             alt="Girl in a jacket"
             height="100%"
             width="100%"
@@ -420,11 +710,7 @@ const handleClick = () => {
                 <b>{texte}</b>
               </h3>
             </div>
-            <div
-              style={{
-                height: "100%",
-              }}
-            >
+            <div>
               <h3
                 style={{
                   padding: "20px",
@@ -432,7 +718,7 @@ const handleClick = () => {
               >
                 <b> REPONSES</b>
               </h3>
-              {response}
+              <div>{response}</div>
             </div>
           </div>
         ) : (
@@ -443,7 +729,11 @@ const handleClick = () => {
           style={{ borderRadius: "10px" }}
           onClick={handleClick}
         >
-          <b>Suivant</b>
+          {currentSerieIndex < levelData.length - 1 ? (
+            <b>Suivant</b>
+          ) : (
+            <b>Terminé</b>
+          )}
         </button>
       </div>
       {answerSubmit && (

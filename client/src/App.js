@@ -18,6 +18,7 @@ import TestCode from "./component/TestCode.js";
 import Accueil from "./component/Accueil.js";
 import Code from "./component/Code.js";
 import { dataa } from "./Data.js";
+import Recapitulatif from "./component/Recapitulatif.js";
 
 /*
 <Route exact path="/" element={<MyComponent />} />
@@ -42,6 +43,8 @@ function App() {
         <NavBar />
         <div
           style={{
+            display: "flex",
+            flexDirection: "column",
             backgroundColor: "#999999",
             width: "80%",
             alignContent: "center",
@@ -55,6 +58,7 @@ function App() {
             <Route exact path="/codetest" element={<CodeTest data={data} />} />
             <Route path="/testCode" element={<TestCode data={dataa} />} />
             <Route path="/autoreview" element={<AutoReview />} />
+            <Route path="/recapitulatif" element={<Recapitulatif />} />
             <Route path="*" element={<ErrorPage />} />
           </Routes>
         </div>

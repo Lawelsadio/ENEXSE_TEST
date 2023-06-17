@@ -230,6 +230,22 @@ const handleClick = () => {
     });
 
   const questions = levelData[currentSerieIndex].questions.map((question) => {
+    const questio = question.question.map((q, index) => {
+      return (
+        <h4
+          className="choix"
+          key={index}
+          style={{
+            borderRadius: "10px",
+            border: "solid #CCCCCC",
+            cursor: "default",
+          }}
+        >
+          {q}
+        </h4>
+      );
+    });
+
     const option = question.options.map((option, idx) => {
       const isSelected =
         selectedOptions[
@@ -237,89 +253,64 @@ const handleClick = () => {
             (q) => q.qid === question.qid
           )
         ] === option;
-
+      console.log("testing");
+      console.log(
+        "levelData[currentSerieIndex].questions.question[idx]",
+        question.question[idx]
+      );
       return (
-        <div>
-          {question.question.length === question.options.length ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  width: "65%",
-                  backgroundColor: "white",
-                  padding: "10px",
-                  paddingBottom: "0px",
-                  borderRadius: "10px",
-                }}
-              >
-                {question.question[idx]}
-              </div>
-              <div
-                style={{
-                  width: "35%",
-                  backgroundColor: "red",
-                  padding: "10px",
-                  paddingBottom: "0px",
-                  borderRadius: "10px",
-                }}
-              >
-                <h4
-                  className="choix"
-                  key={idx}
-                  style={{
-                    background: isSelected ? "#3399FF" : "#CCCCCC",
-                    textTransform: isSelected && "uppercase",
-                    color: isSelected && "white",
-                    borderRadius: "10px",
-                    border: isSelected && "solid black",
-                  }}
-                  onClick={() => handleOptionClick(question.qid, option)}
-                >
-                  {option}
-                </h4>
-              </div>
-            </div>
-          ) : (
-            ""
-          )}
-        </div>
+        <h4
+          className="choix"
+          key={idx}
+          style={{
+            background: isSelected ? "#3399FF" : "#CCCCCC",
+            textTransform: isSelected && "uppercase",
+            color: isSelected && "white",
+            borderRadius: "10px",
+            border: isSelected && "solid black",
+          }}
+          onClick={() => handleOptionClick(question.qid, option)}
+        >
+          {option}
+        </h4>
       );
     });
     return (
-      <div>
-        {question.question.length == question.options.length ? (
-          <div
-            style={{
-              padding: "10px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: "5px",
-              backgroundColor: "#CCCCCC",
-              marginBottom: "10px",
-              borderRadius: "10px",
-            }}
-            key={question.qid}
-          >
-            <div
-              style={{
-                width: "100%",
-                backgroundColor: "white",
-                padding: "10px",
-                paddingBottom: "0px",
-                borderRadius: "10px",
-              }}
-            >
-              {option}
-            </div>
-          </div>
-        ) : (
-          <div></div>
-        )}
+      <div
+        style={{
+          padding: "10px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "5px",
+          backgroundColor: "#CCCCCC",
+          marginBottom: "10px",
+          borderRadius: "10px",
+        }}
+        key={question.qid}
+      >
+        <div
+          style={{
+            width: "65%",
+            backgroundColor: "white",
+            padding: "10px",
+            paddingBottom: "0px",
+            borderRadius: "10px",
+          }}
+        >
+          {questio}
+        </div>
+        <div
+          style={{
+            width: "35%",
+            backgroundColor: "white",
+            padding: "10px",
+            paddingBottom: "0px",
+            borderRadius: "10px",
+          }}
+        >
+          {option}
+        </div>
       </div>
     );
   });

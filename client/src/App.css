@@ -61,6 +61,46 @@
   color:white;
   text-transform: uppercase;
 }
+
+
+
+
+
+
+.accordion {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.accordion-item {
+  border-bottom: 1px solid #ccc;
+}
+.accordion-title {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #e0e0e0;
+}
+.accordion-title:hover {
+  background-color: #e0e0e0a9;
+}
+
+.accordion-title:after {
+  content: '\002B';
+  color: #332c37;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+.accordion-title.active:after {
+  content: "\2212";
+  color: #a2224b;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+.accordion-content {
+  padding: 10px;
+}
+
  .card-disconnected {
   color: rgb(189, 39, 30)
  }
