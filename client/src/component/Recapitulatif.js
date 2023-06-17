@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AutoContext } from "./contexte.js";
 import voiture from "../images/voiture.png";
 import { useLocation } from "react-router-dom";
-
+//test
 function Recapitulatif() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
