@@ -15,11 +15,13 @@ import AutoReview from "./component/AutoRevew.js";
 import { AutoContext } from "./component/contexte.js";
 import CodeTest from "./component/CodeTest.js";
 import TestCode from "./component/TestCode.js";
-import TestcodeCorrigee from "./component/TestcodeCorrigee";
+// import TestcodeCorrigee from "./component/TestcodeCorrigee";
+import TestcodeCorrigeeRefactored from "./component/TestcodeCorrigee-refactored";
 import Accueil from "./component/Accueil.js";
 import Code from "./component/Code.js";
 import { dataa } from "./Data.js";
 import Recapitulatif from "./component/Recapitulatif.js";
+import TestcodeCorrigee from "./components/quiz/TestcodeCorrigeeTailwind";
 
 /*
 <Route exact path="/" element={<MyComponent />} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AutoContext } from "./contexte.js";
 import fallbackImg from "../images/voiture.png";
@@ -42,13 +42,8 @@ function findAnswerIndex(answerToken, options) {
   return idx >= 0 ? idx : -1;
 }
 
-export default function TestcodeCorrigee({ data }) {
-  const {
-    currentSerieIndex,
-    setCurrentSerieIndex,
-    globalAnswer,
-    setGlobalAnswer,
-  } = useContext(AutoContext);
+export default function TestcodeCorrigee() {
+  const { currentSerieIndex, setCurrentSerieIndex, setGlobalAnswer } = useContext(AutoContext);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,9 +51,9 @@ export default function TestcodeCorrigee({ data }) {
   const query = new URLSearchParams(location.search);
   const level = query.get("level");
 
-  const levelData = data?.[0]?.serie_b?.[level] || [];
-  const isOutOfRange =
-    currentSerieIndex < 0 || currentSerieIndex >= levelData.length;
+  const [levelDoc, setLevelDoc] = useState(null);
+  const levelData = useMemo(() => levelDoc?.items || [], [levelDoc]);
+  const isOutOfRange = currentSerieIndex < 0 || currentSerieIndex >= levelData.length;
 
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [answerSubmit, setAnswerSubmit] = useState(false);
@@ -74,17 +69,31 @@ export default function TestcodeCorrigee({ data }) {
     setAllQuestionsAnswered(answered);
   }, [levelData, currentSerieIndex, selectedOptions, isOutOfRange]);
 
-  if (!level || levelData.length === 0 || isOutOfRange) {
+  useEffect(() => {
+    async function fetchLevel() {
+      if (!level) return;
+      try {
+        const res = await fetch(`http://localhost:4000/api/v1/series/${level}`);
+        const json = await res.json();
+        setLevelDoc(json);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchLevel();
+  }, [level]);
+
+  if (!level || !levelDoc) {
     return (
       <div style={{ padding: 20 }}>
-        Données indisponibles pour ce niveau.
+        Chargement des données…
       </div>
     );
   }
 
   const currentItem = levelData[currentSerieIndex];
   const currentQuestions = currentItem.questions;
-  const correctAnswers = ensureArray(currentItem.answer);
+  const correctAnswers = ensureArray(currentItem.answers);
   const explanationText = currentItem.answerText;
 
   function handleOptionClick(questionId, option) {
@@ -200,10 +209,13 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
           {options.map((opt, idx) => {
             const isSelected = selected === opt;
             const isCorrect = opt === correctOption;
+            // label calculé non utilisé visuellement ici
             return (
               <div key={idx} style={{ display: "flex", gap: 5, justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <div style={{ width: "65%", backgroundColor: "white", padding: 10, borderRadius: 10 }}>
-                  <h4 style={{ margin: 0 }}>{questionTexts[idx]}</h4>
+                  <h4 style={{ margin: 0 }}>
+                     {questionTexts[idx]}
+                  </h4>
                 </div>
                 <div style={{ width: "35%", backgroundColor: "white", padding: 10, borderRadius: 10 }}>
                   {renderChoice(opt, isSelected, isCorrect, question.qid, handleOptionClick)}
@@ -219,9 +231,14 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
     return (
       <div key={question.qid} style={{ display: "flex", gap: 5, justifyContent: "space-between", alignItems: "center", backgroundColor: "#CCCCCC", borderRadius: 10, padding: 10, marginBottom: 10 }}>
         <div style={{ width: "65%", backgroundColor: "white", padding: 10, borderRadius: 10 }}>
-          {questionTexts.map((qt, i) => (
-            <h4 key={i} style={{ margin: 0, padding: 10 }}>{qt}</h4>
-          ))}
+          {questionTexts.map((qt, i) => {
+            // labels non affichés ici
+            return (
+              <h4 key={i} style={{ margin: 0, padding: 10 }}>
+                {qt}
+              </h4>
+            );
+          })}
         </div>
         <div style={{ width: "35%", backgroundColor: "white", padding: 10, borderRadius: 10 }}>
           {optionBlocks}
@@ -241,6 +258,26 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
         ? questionTexts[correctIdx]
         : questionTexts[0] || "";
 
+    // Calcul de la lettre (A/B/C/...) à afficher dans l'ovale
+    const LETTERS = ["A","B","C","D","E","F","G","H","I","J","K"];
+    const offset = currentQuestions
+      .slice(0, idx)
+      .reduce((acc, q) => acc + ensureArray(q.question).length, 0);
+    const upperOptions = options.map((o) => String(o).toUpperCase().trim());
+    const tokenUpper = String(correctToken || "").toUpperCase().trim();
+    const hasYesNo = upperOptions.includes("OUI") || upperOptions.includes("NON");
+    let label = "";
+    if (hasYesNo) {
+      // Affiche directement OUI/NON pour les questions binaires
+      label = tokenUpper;
+    } else if (questionTexts.length === options.length && correctIdx >= 0) {
+      // Mise en correspondance 1-1 question[i] ↔ option[i]
+      label = LETTERS[offset + correctIdx] || "";
+    } else {
+      // Fallback: lettre basée sur l'ordre
+      label = LETTERS[offset] || "";
+    }
+
     return (
       <div
         key={question.qid}
@@ -256,8 +293,8 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
           alignItems: "center",
         }}
       >
-        <div style={{ width: "38%", backgroundColor: "white", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", borderRadius: 50, color: "red", padding: 20 }}>
-          <h4 style={{ margin: 0 }}><b>{correctToken}</b></h4>
+        <div style={{ width: "38%", backgroundColor: "white", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", borderRadius: 50, padding: 20 }}>
+          <h4 style={{ margin: 0, color: "#000", fontWeight: 800 }}>{label}</h4>
         </div>
         <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <h4 style={{ margin: 0 }}>{shownQuestionText}</h4>
@@ -286,7 +323,7 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
         <div style={{ backgroundColor: "#CCCCCC", flexGrow: 1, borderBottomRightRadius: 10, borderBottomLeftRadius: 10 }}>
           <img
             style={{ objectFit: "cover", borderBottomRightRadius: 10, borderBottomLeftRadius: 10 }}
-            src={getImageSource(currentItem.image)}
+            src={getImageSource(currentItem.imageUrl)}
             alt="Question illustration"
             height="100%"
             width="100%"
