@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { initialStatus } from "./data";
 
-const baseURL = "http://localhost:4000/api/v1/agent";
+const baseURL = "http://localhost:4000/api/v1/agents";
 const CreateAgent = () => {
   const initialValues = {
     name: "",

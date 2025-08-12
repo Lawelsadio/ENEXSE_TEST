@@ -30,7 +30,7 @@ function ListAgents() {
 
   const deleteAgent = async (id) => {
     try {
-      await axios.delete(`http://localhost:4000/api/v1/${id}`);
+      await axios.delete(`http://localhost:4000/api/v1/agents/${id}`);
       getAgents();
     } catch (error) {
       console.log(error);

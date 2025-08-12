@@ -15,6 +15,7 @@ import AutoReview from "./component/AutoRevew.js";
 import { AutoContext } from "./component/contexte.js";
 import CodeTest from "./component/CodeTest.js";
 import TestCode from "./component/TestCode.js";
+import TestcodeCorrigee from "./component/TestcodeCorrigee";
 import Accueil from "./component/Accueil.js";
 import Code from "./component/Code.js";
 import { dataa } from "./Data.js";
@@ -56,7 +57,8 @@ function App() {
             <Route exact path="/code" element={<Code />} />
             <Route exact path="/code/examen" element={<Auto data={data} />} />
             <Route exact path="/codetest" element={<CodeTest data={data} />} />
-            <Route path="/testCode" element={<TestCode data={dataa} />} />
+            {/*<Route path="/testCode" element={<TestCode data={dataa} />} />*/}
+            <Route path="/testCode" element={<TestcodeCorrigee data={dataa} />} />
             <Route path="/autoreview" element={<AutoReview />} />
             <Route path="/recapitulatif" element={<Recapitulatif />} />
             <Route path="*" element={<ErrorPage />} />

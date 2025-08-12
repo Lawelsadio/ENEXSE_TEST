@@ -14,7 +14,7 @@ const UpdateAgent = () => {
   const disabled = agent.name === "" || agent.id === "" || !verif;
   const navigate = useNavigate();
   const { id } = useParams();
-  const baseURL = `http://localhost:4000/api/v1/${id}`;
+  const baseURL = `http://localhost:4000/api/v1/agents/${id}`;
 
   useEffect(() => {
     getAgentById();

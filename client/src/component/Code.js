@@ -1,41 +1,42 @@
 import React, { useState, useContext, useEffect } from "react";
-import { dataa } from "../Data.js";
 import { useNavigate } from "react-router-dom";
 import { AutoContext } from "./contexte.js";
 import voiture from "../images/voiture.png";
 
-console.log("dataa", dataa[0].serie_b);
 function Series() {
-  const series = [
-    "un",
-    "deux",
-    "trois",
-    "quatre",
-    "cinq",
-    "six",
-    "sept",
-    "huite",
-    "neuf",
-    "dix",
-    "ounze",
-    "douze",
-  ];
-
-  const result = series.map((serie) => {
-    return {
-      serieLevel: serie,
-      serieData: dataa[0].serie_b[serie],
-    };
-  });
   const navigate = useNavigate();
   const { setCurrentSerieIndex, setGlobalAnswer } = useContext(AutoContext);
 
   useEffect(() => {
     setCurrentSerieIndex(0);
     setGlobalAnswer([]);
+  }, [setCurrentSerieIndex, setGlobalAnswer]);
+  const [seriData, setSeriData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchLevels() {
+      try {
+        const res = await fetch("http://localhost:4000/api/v1/series");
+        if (!res.ok) {
+          setError(`HTTP ${res.status}`);
+          setSeriData([]);
+          return;
+        }
+        const data = await res.json();
+        setSeriData(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error(e);
+        setError(String(e));
+        setSeriData([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLevels();
   }, []);
-  const [seriData, setSeriData] = useState(result);
-  console.log("seriData", seriData);
+
   const showLevels = seriData.map((level, idx) => {
     return (
       <div
@@ -51,10 +52,10 @@ function Series() {
           textAlign: "center",
           cursor: "pointer",
         }}
-        onClick={() => handleClick(level.serieLevel)}
+        onClick={() => handleClick(level.level || level.serieLevel)}
       >
         <h5>
-          <b>{level.serieLevel}</b>
+          <b>{level.level || level.serieLevel}</b>
         </h5>
       </div>
     );
@@ -63,6 +64,32 @@ function Series() {
     const queryString = new URLSearchParams({ level }).toString();
     navigate(`/testCode?${queryString}`);
   };
+  if (loading) {
+    return (
+      <div
+        style={{
+          backgroundColor: "#edeceb",
+          width: "80%",
+          alignContent: "center",
+          flexGrow: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: 400,
+        }}
+      >
+        Chargement des séries…
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div style={{ padding: 20, color: "#900" }}>
+        Erreur de chargement des séries: {error}. Assure-toi que le serveur tourne
+        et que la route /api/v1/series est disponible.
+      </div>
+    );
+  }
   return (
     <div
       style={{
