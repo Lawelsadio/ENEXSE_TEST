@@ -93,7 +93,7 @@ export default function TestcodeCorrigee() {
 
   const currentItem = levelData[currentSerieIndex];
   const currentQuestions = currentItem.questions;
-  const correctAnswers = ensureArray(currentItem.answer);
+  const correctAnswers = ensureArray(currentItem.answers);
   const explanationText = currentItem.answerText;
 
   function handleOptionClick(questionId, option) {
@@ -209,11 +209,7 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
           {options.map((opt, idx) => {
             const isSelected = selected === opt;
             const isCorrect = opt === correctOption;
-            const LETTERS = ["A","B","C","D","E","F","G","H"];
-            const offset = currentQuestions
-              .slice(0, qIdx)
-              .reduce((acc, q) => acc + ensureArray(q.question).length, 0);
-            const label = LETTERS[offset + idx] || "";
+            // label calculé non utilisé visuellement ici
             return (
               <div key={idx} style={{ display: "flex", gap: 5, justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <div style={{ width: "65%", backgroundColor: "white", padding: 10, borderRadius: 10 }}>
@@ -236,11 +232,7 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
       <div key={question.qid} style={{ display: "flex", gap: 5, justifyContent: "space-between", alignItems: "center", backgroundColor: "#CCCCCC", borderRadius: 10, padding: 10, marginBottom: 10 }}>
         <div style={{ width: "65%", backgroundColor: "white", padding: 10, borderRadius: 10 }}>
           {questionTexts.map((qt, i) => {
-            const LETTERS = ["A","B","C","D","E","F","G","H"];
-            const offset = currentQuestions
-              .slice(0, qIdx)
-              .reduce((acc, q) => acc + ensureArray(q.question).length, 0);
-            const label = LETTERS[offset + i] || "";
+            // labels non affichés ici
             return (
               <h4 key={i} style={{ margin: 0, padding: 10 }}>
                 {qt}
@@ -271,14 +263,19 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
     const offset = currentQuestions
       .slice(0, idx)
       .reduce((acc, q) => acc + ensureArray(q.question).length, 0);
+    const upperOptions = options.map((o) => String(o).toUpperCase().trim());
+    const tokenUpper = String(correctToken || "").toUpperCase().trim();
+    const hasYesNo = upperOptions.includes("OUI") || upperOptions.includes("NON");
     let label = "";
-    if (questionTexts.length === options.length && correctIdx >= 0) {
+    if (hasYesNo) {
+      // Affiche directement OUI/NON pour les questions binaires
+      label = tokenUpper;
+    } else if (questionTexts.length === options.length && correctIdx >= 0) {
       // Mise en correspondance 1-1 question[i] ↔ option[i]
       label = LETTERS[offset + correctIdx] || "";
     } else {
-      // Questions non pairées (ex: OUI/NON). On mappe OUI→index 0, NON→index 1
-      const oi = correctToken === "NON" ? 1 : 0;
-      label = LETTERS[offset + oi] || "";
+      // Fallback: lettre basée sur l'ordre
+      label = LETTERS[offset] || "";
     }
 
     return (
@@ -297,7 +294,7 @@ function renderChoice(option, isSelected, isCorrect, ownerQid, onSelect) {
         }}
       >
         <div style={{ width: "38%", backgroundColor: "white", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", borderRadius: 50, padding: 20 }}>
-          <h4 style={{ margin: 0 }}><b>{label}</b></h4>
+          <h4 style={{ margin: 0, color: "#000", fontWeight: 800 }}>{label}</h4>
         </div>
         <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <h4 style={{ margin: 0 }}>{shownQuestionText}</h4>
